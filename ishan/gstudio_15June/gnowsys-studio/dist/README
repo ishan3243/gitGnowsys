@@ -1,0 +1,27 @@
+Textb
+  Django application that allows collaborative writing of texts.
+
+  This projects uses google-mobwrite for collaboration and syncing of text
+
+Get:
+    bzr branch http://textb.org/ textb
+    cd textb
+    virtualenv .
+    pip -E . install -r requirements.txt
+
+Develop:
+    create textb/local_settings.py
+
+    . bin/activate
+    cd textb
+    python manage.py shell
+
+    python manage.py runserver
+
+Deploy:
+    create textb/local_settings.py
+
+    create /etc/apache2/sites-availavle/sitename.conf
+    based on apache/vhost.conf.in:
+     replace __PREFIX__ with location of this folder
+

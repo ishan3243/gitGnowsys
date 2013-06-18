@@ -1,0 +1,35 @@
+<html>
+<head>
+<title>Div url</title>
+<script>
+    function previewUrl(url,target){
+
+            var div = document.getElementById(target);
+            div.innerHTML = '<iframe style="width:100%;height:100%;" frameborder="0" src="' + url + '" />';
+              
+    }   
+</script>
+</head>
+
+<body>
+<table>
+<tr>
+<td>
+    <button type="button" onclick="previewUrl('{{new_url}}','div1')">Request data</button>
+<!--    <a href="/home/ishem/Desktop/sri_ganesha1.jpg" onmouseover="previewUrl(this.href,'div1')">google</a> 
+
+        //use timeout coz mousehover fires several times
+        clearTimeout(window.ht);
+        window.ht = setTimeout(function(){
+
+},20);
+-->
+</td>
+<td>
+    <div id="div1" style="width:400px;height:200px;border:1px solid #ddd;"></div>
+</td>
+</tr>
+</table>
+</body>
+</html>
+
