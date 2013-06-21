@@ -1,6 +1,7 @@
 gstudio
 notification
 app
+textbapp
 demo
 mobwrite
 recaptcha

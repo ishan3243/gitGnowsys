@@ -199,7 +199,7 @@ mobwrite.uniqueId = function() {
  * @type {string}
  */
 mobwrite.syncUsername = mobwrite.uniqueId();
-//mobwrite.syncUsername = {{request.user.username}}
+//mobwrite.syncUsername = {{username}};       can't use django template tags in an external javascript file.
 
 /**
  * Hash of all shared objects.

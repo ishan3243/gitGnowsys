@@ -14,22 +14,6 @@ from django.http import Http404
 import models
 
 
-def syncfx(request):
-	#print "WE ARE IN THE SYNC FUNCTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	if request.method=='POST':
-		if 'pageid' in request.POST and request.POST['pageid']:
-			models.TextObj.syncdb(request.POST['pageid'])
-			return HttpResponse("in saving your changes.")
-		else:
-			raise Http404
-			return
-	
-	else:
-		raise Http404
-		return 
-
-		
-
 def processRequest(q):
     a = ''
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

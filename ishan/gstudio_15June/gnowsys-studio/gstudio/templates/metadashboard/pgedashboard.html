@@ -19,8 +19,9 @@
 			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/form.js"></script>
 			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/iframe.js"></script>
 			<script>
-			mobwrite.syncGateway = '/mobwrite/';
-                        $(document).ready(function(){
+			mobwrite.syncGateway = '/textb/mobwrite/';
+	       	        mobwrite.syncUsername = "{{request.user.username}}";	
+                       /* $(document).ready(function(){
 			
 		
 			$("#publishtextb").click(function(){
@@ -49,7 +50,7 @@
 				mobwrite.share('id{{page_ob.id}}');/*Start the mobwrite and share the above textarea with all clients and 										server editing this page */
 				/* insert 4 spaces instead of leaving textarea */
 				/*this is required since in a form with a textarea , a tab skips the cursor to the next form element which we 						don't want here */
-				    function insertTab(e) {
+				/*    function insertTab(e) {
 					if (e.keyCode == 9) {
 					    var tab = "    ";
 					    var txt = e.currentTarget;
@@ -67,29 +68,8 @@
 				    $("#id{{page_ob.id}}").keydown(insertTab);
 				});
 
-                       });
+                       });*/
 		
-			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//$("#publishtextb").click(function(){
-				//	publishtextb_func();//copy data from text column of mobwrite_textobj to content_org of 									objectapp_gbobject
-					//delete all records with filename: _id{{page_ob.id}} from mobwrite_textobj and mobwrite_viewobj
-					//Redirect to the same url
-				//});
 			</script>
 		{% endblock %}
 
@@ -292,19 +272,20 @@ $(".savesubsec1").hide();
 
 	<input type="hidden" value="{{user.username}}" name ="usr">
 	<input type="hidden" value="{{user.id}}" name = "idusr">
-	<input type="button" class="editpagecontent" name="{{page_ob.content_org}}" value="Edit"/>
-	<input type="button" class="savepagecontent" name="{{page_ob.id}}" value="Save"/></br>
+	<input type="button" class="editpagecontent" name="{{page_ob.content_org}}" value="Edit" id="{{page_ob.id}}"/>
+	<input type="button" class="savepagecontent" name="{{page_ob.id}}" value="Save" id="{{page_ob.id}}"/></br>
 	<input type="submit" class="pagedit" value="Submit"/>
        </form>
 
-	<div id="textb">
+	<div id="randomid" name="{{page_ob.id}}"/>
+	<!--<div id="textb">
 	<button id="edittextb">Edit with textb</button> 
         <br>
 	<textarea hidden id="id{{page_ob.id}}" style="width:450px" value="{{user.username}} with user id : {{user.id}} is editing {{ page_ob.title }} with page id : {{page_ob.id}} ; Page content : {{page_ob.content_org}} "></textarea>
 	<br>
 	<button hidden id="publishtextb">Publish</button>
 	<br>
-</div>
+</div>-->
         {% endif %}
 	<div id="coll">
 	  

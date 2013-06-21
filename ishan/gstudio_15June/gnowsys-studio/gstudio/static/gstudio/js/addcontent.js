@@ -183,12 +183,15 @@ function moveDown() {
 	    $(".editpagecontent").hide();
       	  //  $(".savepagecontent").show();
  	    $("#content img").css({"max-width":"600px",})
-	   
+	  
 	    $("#content").css({"width":"600px",})
-	    document.getElementById('gnoweditor').style.visibility="visible";
+
 	    $("#gnoweditor").orgitdown(mySettings);
+	    
+	    $(".orgitdownEditor").attr("id","gnoweditor"+this.id);   //textb
+	    document.getElementById('gnoweditor'+this.id).style.visibility="visible";
             var a = this.name;
-	    $("#gnoweditor").val(a);
+	    $("#gnoweditor"+this.id).val(a);
 	    var elmts = document.getElementsByClassName("editval");
 	    for (var i = 0; i < elmts.length; i++){
 		elmts[i].setAttribute("value","edited");}
@@ -204,6 +207,46 @@ function moveDown() {
 	   $(".deletesec").hide();
 	   $(".editseccontent").hide();
 	   $(".editsubsec").hide();
+	mobwrite.syncGateway = '/textb/mobwrite/';
+
+
+
+   	/*$("#gnoweditor").load(function() {
+        	mobwrite.share('gnoweditor');
+    	});*/
+
+    	var iframe = document.getElementById('gnoweditor'+this.id);
+   	 iframe.onkeypress = function () {	
+	
+      // Is the sync gap big? and do we have a sync in transit?
+      if ((mobwrite.syncInterval > 1000) && (mobwrite.syncKillPid_==null)) {
+        // Stop the current timer, run a sync, and start the timer again.
+        window.clearTimeout(mobwrite.syncRunPid_);
+        mobwrite.syncRun1_();
+        mobwrite.syncRunPid_ = window.setTimeout(mobwrite.syncRun1_,mobwrite.syncInterval);
+      }
+    };
+
+    mobwrite.share('gnoweditor'+this.id);   //textb
+
+    /* insert 4 spaces instead of leaving textarea */
+    function insertTab(e) {
+        if (e.keyCode == 9) {
+            var tab = "    ";
+            var txt = e.currentTarget;
+            var pos = txt.selectionStart;
+            var scrollTop = txt.scrollTop;
+            txt.value = txt.value.substring(0, pos) + tab + txt.value.substring(txt.selectionEnd, txt.textLength);
+            txt.focus();
+            txt.selectionStart = pos + tab.length;
+            txt.selectionEnd = pos + tab.length;
+            txt.scrollTop = scrollTop;
+            return false;
+        }
+        return true;
+    }
+    $("#gnoweditor"+this.id).keydown(insertTab);   //textb
+
 	  
 		    
        });
@@ -248,7 +291,7 @@ function moveDown() {
 
    	
        $(".savepagecontent").one("click",function(){
-	   var org_data = $("#gnoweditor").val();
+	   var org_data = $("#gnoweditor"+this.id).val();   //textb
 	   var elmts = document.getElementsByClassName("reptext");
 	   var encode_data = encodeURIComponent(org_data);
 	   var decode_data = decodeURIComponent(encode_data.replace(/\+/g, " "));
@@ -257,6 +300,8 @@ function moveDown() {
            $(".pagedit").trigger('click');
 	   $(".savepagecontent").hide();
 	   $(".orgitdownContainer").hide();
+	   mobwrite.unshare("gnoweditor"+this.id);    //textb
+	   $.post('/textb/deleteLink/',{pageid:this.id});   //textb
       	  
        });
       $("#editnodecontent").one("click",function(){

@@ -986,3 +986,8 @@ recaptcha/widgets.py
 recaptcha/client/__init__.py
 recaptcha/client/captcha.py
 recaptcha/client/mailhide.py
+textbapp/__init__.py
+textbapp/models.py
+textbapp/tests.py
+textbapp/urls.py
+textbapp/views.py

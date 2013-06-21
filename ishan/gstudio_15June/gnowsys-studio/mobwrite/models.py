@@ -16,20 +16,8 @@ from reversion import revision
 from reversion.models import Version
 
 import mobwrite_core
-from objectapp.models import Gbobject
+from objectapp.models import Gbobject   #textb mobwrite
 
-    
-
-def stringToHtml(s):
-    i=0
-    new="<p>"+s+"</p>"
-    for c in new:
-        if c=='\n':
-            new=new[:(i-1)]+"<br>"+new[i:]
-            i+=4           
-        else:            
-            i+=1
-    return new    
     
 def randomString(length):
     s = ''
@@ -116,19 +104,6 @@ class TextObj(mobwrite_core.TextObj, models.Model):
             o.save()
     return o
   get_or_insert = classmethod(get_or_insert)
-
-
-  def syncdb(model,pageid):                           #method to copy data from TextObj to GBobj (at the time of publish)
-    textobj=model.objects.get(filename="_id"+pageid)  # _ is added to filename in safename method
-    gbobj=Gbobject.objects.get(node_ptr_id=pageid)   
-    gbobj.content_org=textobj.text
-    gbobj.content=stringToHtml(textobj.text)
-    gbobj.save()
-    textobj.delete()
-    return
-               
-    
-  syncdb = classmethod(syncdb)
     
 
 def fetchText(name):
