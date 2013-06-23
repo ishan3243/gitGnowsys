@@ -16,7 +16,7 @@ from reversion import revision
 from reversion.models import Version
 
 import mobwrite_core
-from objectapp.models import Gbobject   #textb mobwrite
+from objectapp.models import Gbobject
 
     
 def randomString(length):
@@ -98,7 +98,9 @@ class TextObj(mobwrite_core.TextObj, models.Model):
         o = model(filename=filename)
         o.save()
         #textb,mobwrite
-        t_text = Gbobject.objects.get(node_ptr_id=int(o.filename[-3:])).content_org   #over-ride initial data with data from GBobjects
+        nodePTR=o.filename[12:len(o.filename)]
+        nodePTR=nodePTR[0:nodePTR.find("+")]
+        t_text = Gbobject.objects.get(node_ptr_id=int(nodePTR)).content_org   #over-ride initial data with data from GBobjects
         if(t_text is not None and t_text !=""):
             o.text= t_text
             o.save()

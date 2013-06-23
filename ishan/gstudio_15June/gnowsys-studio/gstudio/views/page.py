@@ -19,6 +19,9 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from gstudio.models import *
 from gstudio.methods import *
+from textbapp.models import *
+from mobwrite.models import *
+from django.db import models
    
 def pagedashboard(request,pageid):
    pageid = int(pageid)
@@ -88,8 +91,25 @@ def pagedashboard(request,pageid):
    iscoll=collsys.filter(title="Collection")
    if iscoll:
       collection=True
-
-   variables = RequestContext(request, {'ot' : ot,'section' : Section,'page_ob' : page_ob,'object':page_ob,'admin_m':admin_m,"flag" : flag,"admin_id" : admin_id,'post':post,'test':test, 'test1':test1,'collection':collection})
+   
+   #userlist=[]
+   pageRequests=[]
+   if (request.user.is_authenticated()):
+      user=User.objects.get(username=request.user.username)
+      
+      try:  
+         textobjs=TextObj.objects.filter(securitycheck__sharedWith=user, filename__startswith="_gnoweditor+"+str(pageid)+"+") #fetches all textobjs corresponding to a set of filenames and requesting user. filename example "_gnoweditor+499+adam"
+         for t in textobjs:
+            owner=t.filename[12:len(t.filename)]
+            owner=owner[owner.find("+")+1:len(owner)]
+            pageRequests.append(owner)
+      except TextObj.DoesNotExist:
+         print "hipagepy" 
+      finally:
+         print "finallyhi"
+      
+      #userlist=User.objects.all()
+   variables = RequestContext(request, {'requestOwners':pageRequests, 'ot' : ot,'section' : Section,'page_ob' : page_ob,'object':page_ob,'admin_m':admin_m,"flag" : flag,"admin_id" : admin_id,'post':post,'test':test, 'test1':test1,'collection':collection})
    template= "metadashboard/download.html"
    template = "metadashboard/pgedashboard.html"
    return render_to_response(template, variables)

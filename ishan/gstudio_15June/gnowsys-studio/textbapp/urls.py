@@ -14,9 +14,11 @@ urlpatterns = patterns(
     #(r'^t/(?P<name>.+)/', 'mobwrite.views.text'),
     #(r'^$', 'app.views.index'),
     #(r'^new/$', 'mobwrite.views.new'),
-    (r'^mobwrite/', 'mobwrite.views.mobwrite'), 
+    (r'^mobwrite/', 'textbapp.views.mobwriteText'), 
     #(r'^test/', test_view), 
     #(r'^synclink/$','mobwrite.views.syncfx'),
     (r'^deleteLink/$','textbapp.views.deleteFx'),
-
+    (r'^securityCheck/$','textbapp.views.securityCheckFx'),
+    (r'^addRequest/$','textbapp.views.addRequestFx'),
+    (r'^getUserList/$','textbapp.views.getUserListFx'),
 )
