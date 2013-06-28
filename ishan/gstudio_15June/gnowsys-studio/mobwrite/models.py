@@ -228,9 +228,10 @@ class DjangoMobWrite(mobwrite_core.MobWrite):
         mobwrite_core.LOG.warning("Duplicate packet for buffer '%s'." % namespace)
     return urllib.unquote(text)
 
-  def cleanup(self):
+  def cleanup(self):   #need to modify this.
     def cleanTable(model, limit):
-      query = model.objects.filter(lasttime__lt=limit).delete()
+      query = model.objects.filter(lasttime__lt=limit).delete()     #lt means 'less than'
+   # print "!!!!!!!!!!!!!!!!!cleaning in progress !!!!!!!!!!!!!!!!"
 
     mobwrite_core.LOG.info("Cleaning database")
     # Delete any view which hasn't been written to in a while.

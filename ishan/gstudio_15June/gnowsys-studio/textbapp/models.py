@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 class SecurityCheck(models.Model):
 	textobj=models.ForeignKey(mobwrite.models.TextObj)
+	pageid=models.IntegerField()
 	owner=models.CharField(max_length=255)
 	sharedWith=models.ManyToManyField(User)
 	

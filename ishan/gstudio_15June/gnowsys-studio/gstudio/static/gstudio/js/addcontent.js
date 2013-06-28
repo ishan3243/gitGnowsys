@@ -150,9 +150,9 @@ function moveDown() {
 	   editSubsection=true;
 	   var each_id=$(this).attr("id");
 	   $("#chart").hide();
-	   $("#content img").css({"max-width":"600px",})
+	   $("#content img").css({"max-width":"600px",});
 	   
-	   $("#content").css({"width":"600px",})
+	   $("#content").css({"width":"600px",});
 	   document.getElementById('gnoweditor').style.visibility="visible";
 	   $("#gnoweditor").orgitdown(mySettings);
 	   var org_data=$("#subsec"+each_id).val();
@@ -176,22 +176,35 @@ function moveDown() {
 	   $(".chkbox").hide();
 	   $(".deletesec").hide();
        });
+
+       var pageid=(location.href.split("/"))[6];
        $(".editpagecontent").one("click",function(){
+	tObjName = '';
+	  
+	   //alert('helooooo');
+	  //  $("#requestHeading").show();
+	    //$("#dynamic").show();
+	    //$(".sendRequest").show();
+	   // $("#hiddenButton2").trigger("click");
 	    $(this).replaceWith('<textarea id="gnoweditor" style="visibility:hidden;width:450px"></textarea>');
+	    
 	    editWikipage=true;
       	    $("#chart").hide();
 	    $(".editpagecontent").hide();
       	  //  $(".savepagecontent").show();
- 	    $("#content img").css({"max-width":"600px",})
+ 	    $("#content img").css({"max-width":"600px",});
 	  
-	    $("#content").css({"width":"600px",})
-
+	    $("#content").css({"width":"600px",});
 	    $("#gnoweditor").orgitdown(mySettings);
-	    
-	    $(".orgitdownEditor").attr("id","gnoweditor"+this.id);   //textb
-	    document.getElementById('gnoweditor'+this.id).style.visibility="visible";
+	    $.post('/textb/editButton/',{pageid:pageid},function(data,status){		
+		if(status=="error")	alert("no!!!!!!");
+		else {$(".orgitdownEditor").attr("id",data);   tObjName= tObjName+data;   }
+		});
+	       //textb	    
+		
+            document.getElementById($(".orgitdownEditor").attr("id")).style.visibility="visible";
             var a = this.name;
-	    $("#gnoweditor"+this.id).val(a);
+	    $("#"+$(".orgitdownEditor").attr("id")).val(a);
 	    var elmts = document.getElementsByClassName("editval");
 	    for (var i = 0; i < elmts.length; i++){
 		elmts[i].setAttribute("value","edited");}
@@ -215,7 +228,7 @@ function moveDown() {
         	mobwrite.share('gnoweditor');
     	});*/
 
-    	var iframe = document.getElementById('gnoweditor'+this.id);
+    	var iframe = document.getElementById($(".orgitdownEditor").attr("id"));
    	 iframe.onkeypress = function () {	
 	
       // Is the sync gap big? and do we have a sync in transit?
@@ -224,11 +237,37 @@ function moveDown() {
         window.clearTimeout(mobwrite.syncRunPid_);
         mobwrite.syncRun1_();
         mobwrite.syncRunPid_ = window.setTimeout(mobwrite.syncRun1_,mobwrite.syncInterval);
-      }
-    };
-
-    mobwrite.share('gnoweditor'+this.id);   //textb
-
+         }
+       };
+    //alert($(".orgitdownEditor").attr("id"));	
+    //alert($(".orgitdownEditor").attr("id"));	
+     setTimeout(function(){
+     $("#groups").show();
+     $.post('/textb/getAllGroups/',{pageid:pageid ,filename:$(".orgitdownEditor").attr("id") },function(data,status){
+		if(status=="error") alert("Status: "+status);
+		else
+		{	
+			var len1=data.length;			
+			for(i=0;i<len1;i++)
+			{	
+				if(i==0)  var str="<ul>Your Group</ul>";
+				else	  var str="<ul>Other Group</ul>";
+				var len=data[i].length;
+				for(j=0;j<len;j++)
+				{
+					position=str.length-5;
+					str=[str.slice(0, position),"<li>"+data[i][j]+"</li>", str.slice(position)].join('');				
+				}
+				$("#currentGroups").append(str);
+						
+			}		
+		}
+		
+	});
+},4000);  
+  
+    setTimeout(function(){mobwrite.share($(".orgitdownEditor").attr("id"))},2000);   //textb
+   
     /* insert 4 spaces instead of leaving textarea */
     function insertTab(e) {
         if (e.keyCode == 9) {
@@ -245,11 +284,22 @@ function moveDown() {
         }
         return true;
     }
-    $("#gnoweditor"+this.id).keydown(insertTab);   //textb
+    $(".orgitdownEditor").keydown(insertTab);   //textb
 
 	  
-		    
-       });
+          $("#hiddenButton").trigger('click');   
+	$("#invite").show();   
+	 
+	// var suggests;
+	  // alert('getting userlist');
+           $.post("/textb/getUserList/",{},function(data,status){suggests=data;});
+           //$("#dynamic").autocomplete({source:suggests}); 
+
+});
+	
+
+
+
 	$(".addtodrawer").click(function(){
 	alert("test");
 	  
@@ -291,7 +341,15 @@ function moveDown() {
 
    	
        $(".savepagecontent").one("click",function(){
-	   var org_data = $("#gnoweditor"+this.id).val();   //textb
+	   
+	mobwrite.unshare($(".orgitdownEditor").attr("id"));    //textb
+	   
+	$.post('/textb/deleteLink/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
+		if(data==='DS') alert("Your work has been published");
+		else alert('Error: '+status);	}
+	);
+	   
+	   var org_data = $(".orgitdownEditor").val();   //textb
 	   var elmts = document.getElementsByClassName("reptext");
 	   var encode_data = encodeURIComponent(org_data);
 	   var decode_data = decodeURIComponent(encode_data.replace(/\+/g, " "));
@@ -300,10 +358,11 @@ function moveDown() {
            $(".pagedit").trigger('click');
 	   $(".savepagecontent").hide();
 	   $(".orgitdownContainer").hide();
-	   mobwrite.unshare("gnoweditor"+this.id);    //textb
-	   $.post('/textb/deleteLink/',{pageid:this.id});   //textb
-      	  
+	
+      	   
        });
+
+
       $("#editnodecontent").one("click",function(){
 	  isNode=true;
       	    $("#chart").hide();

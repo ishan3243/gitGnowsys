@@ -35,8 +35,8 @@ DMP.Diff_Timeout = 0.1
 # Set to 0 to disable limit.
 MAX_CHARS = 0
 
-# Delete any view which hasn't been accessed in half an hour.
-TIMEOUT_VIEW = datetime.timedelta(minutes=30)
+# Delete any view which hasn't been accessed in 31 seconds.
+TIMEOUT_VIEW = datetime.timedelta(seconds=31)  
 
 # Delete any text which hasn't been accessed in a day.
 # TIMEOUT_TEXT should be longer than the length of TIMEOUT_VIEW

@@ -17,90 +17,228 @@ from django.contrib.auth.models import User
 import json
 import mobwrite.views
 
+def checkOwnership(request):
+	if request.POST['user'] and request.POST['owner']:
+		return request.POST['user'] == request.POST['owner']
+
 def deleteFx(request):
-	if request.method=='POST':
-		if 'pageid' in request.POST and request.POST['pageid']:
-			(TextObj.objects.filter(filename="_gnoweditor"+request.POST['pageid'])).delete()
+	if request.method=='POST' and 'textObjName' in request.POST and request.POST['textObjName']:
+		try:
+			securityCheckObj = SecurityCheck.objects.get(textobj__filename="_"+request.POST['textObjName'],owner=request.user.username)
+			textObj=securityCheckObj.textobj
+			securityCheckObj.delete()
+			textObj.delete()
+			return HttpResponse("DS")
+		except SecurityCheck.DoesNotExist:
+			raise Http404()
 	else: 
 		raise Http404()
-	return
-
-def securityCheckFx(request):
-	if request.method=='POST':
-		if 'pageid' in request.POST and request.POST['pageid'] and 'owner' in request.POST and request.POST['owner']:
-			 try:
-				textobj=TextObj.objects.get(securitycheck__sharedWith=User.objects.get(username=request.user.username), filename__exact="_gnoweditor+"+request.POST['pageid']+"+"+request.POST['owner'])
-                         	return HttpResponse(textobj.filename[1:len(textobj.filename)])
-			 except TextObj.DoesNotExist:
-				return HttpResponse("")
-	else: 
-		raise Http404()
-	        return HttpResponse("")
-
+			
 def addRequestFx(request):
-	print "!!!!!!!!!!!!!!!!!!!!in add request!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"	
-	pageid= request.POST['pageid']
-	owner= request.POST['owner']
-	username= request.POST['username']
 	if request.method=='POST':
-		if 'pageid' in request.POST and request.POST['pageid'] and 'owner' in request.POST and request.POST['owner'] and 'username' in request.POST and request.POST['username']:
- 			try:	
-				print username+"hi try\n"		
-				if username==owner:
-					return HttpResponse("Can't send a request to yourself")	
-				uuu = User.objects.get(username=username)
-					
-				print "hi try22222\n"			
-				filename="_gnoweditor+"+str(pageid)+"+"+str(owner)				
-				textobj=TextObj.objects.get(filename=filename)
-				filename="_gnoweditor+"+str(pageid)+"+"+str(owner)
-				print "\n!!!!"+filename+"!!!!\n"
-				try:				
-					securityCheckObj=SecurityCheck.objects.get(textobj=textobj,owner=owner)			
-				except SecurityCheck.DoesNotExist:					
-					securityCheckObj=SecurityCheck(textobj=textobj,owner=owner)
-					securityCheckObj.save()	
-				
-				#if(SecurityCheck.objects.filter(owner=owner,sharedWith__username=username).exists()):
-				#	print SecurityCheck.objects.filter(owner=owner,sharedWith__username=username)	
-				#	print '#####!!!!!!!\n'				
-				#	return HttpResponse("user already invited!")
-								
+		if 'textObjName' in request.POST and request.POST['textObjName'] and 'sentTo' in request.POST and request.POST['sentTo'] and request.user.is_authenticated():
+			sentTo= request.POST['sentTo']
+			textObjName= request.POST['textObjName']	 				
+			filename="_"+textObjName			
+			
+			if sentTo==request.user.username:
+				return HttpResponse("Can't send a request to yourself")				
+									
+		
+			try:				
+				uuu = User.objects.get(username=sentTo)			
+				textobj=TextObj.objects.get(filename=filename)			
+				securityCheckObj=SecurityCheck.objects.get(textobj=textobj,owner=request.user.username)			
 				securityCheckObj.sharedWith.add(uuu)
-				
-				print securityCheckObj,"\n"
-				securityCheckObj.save()			 
-                        except User.DoesNotExist:
-				print "except"
+				securityCheckObj.save()	
+				return HttpResponse("request sent successfully")		
+		
+			except User.DoesNotExist:
 				return HttpResponse("user does not exist! Please enter a valid username")
-			return HttpResponse("Request sent successfully!!")
+				
+			except SecurityCheck.DoesNotExist:					
+				return HttpResponse("bad internal failure!!!")
+		
+			except TextObj.DoesNotExist:		
+				return HttpResponse("bad internal failure!!!")
+							 
+		else:
+			return HttpResponse("invalid  details")
 	else: 
 		raise Http404()
 
 def getUserListFx(request):
 	if request.method=='POST':
 		
-		userlist=User.objects.values('username')
-		userlis=[]		
-		for u in userlist:
-			userlis.append(u['username']);
-		HttpResponse(json.dumps(userlis))
+		userlist=[]
+		for each in User.objects.all():
+			userlist.append(each.username.__str__()+"  <"+each.email.__str__()+">")
+        	userListJson = json.dumps(userlist)
+    		return HttpResponse(userListJson)
 	else:
 		raise Http404()
-	       
+  
+
 def mobwriteText(request):
-	return mobwrite.views.mobwrite(request)
+	
 	if request.method=='POST':
-		
-			if (request.user.username==request.POST['owner']):
-				return mobwrite.views.mobwrite(request)			 
-			try:
-				textobj=TextObj.objects.get(securitycheck__sharedWith=User.objects.get(username=request.user.username), filename__exact="_gnoweditor+"+request.POST['pageid']+"+"+request.POST['owner'])
-                         	return mobwrite.views.mobwrite(request)
-			 
-			except TextObj.DoesNotExist:
-				raise Http404()
-			else: 
-				raise Http404()
-	else: 
+		q = urllib.unquote(request.raw_post_data)
+   		mode = None
+    		if q.find("p=") == 0:
+        		mode = "script"
+    		elif q.find("q=") == 0:
+        		mode = "text"
+    
+	else:
+	        return HttpResponseBadRequest("Missing q= or p=")
+	#print "!!!!!!!!!!!!!!!!!!!!",q,"!!!!!!!!!!!!!!!!"
+        q = q[2:]
+        q1=q[q.find('\n')+1:len(q)]
+        q1=q1[0:q1.find('\n')]
+    	q1=q1[q1.find(':')+1:len(q1)]
+    	q1=q1[q1.find(':')+1:len(q1)]   #this is the filename from the raw post data
+	#print entryExists(q1)
+	#print q1
+	if not entryExists(q1):
 		raise Http404()
+		return HttpResponse()
+	else:
+		if isOwner(request,q1):
+			return mobwrite.views.mobwrite(request)
+		elif isSharedWith(request,q1):
+			return mobwrite.views.mobwrite(request)
+		else:
+			raise Http404()
+			return HttpResponse()
+
+def getCurrentUsersFx(request):
+	if request.method=='POST' and 'filename' in request.POST and request.POST['filename']:
+		#print request.POST['filename']
+		currUsers=ViewObj.objects.filter(filename=request.POST['filename']);
+		curr=[];		
+		for c in currUsers:
+			curr.append(c.username)
+		#print curr,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+		return HttpResponse(json.dumps(curr),content_type="application/json")
+	else:
+		raise Http404()
+      
+#display all groups
+def getAllGroupsFx(request):
+	if request.method=='POST' and 'filename' in request.POST and request.POST['filename'] and 'pageid' in request.POST and request.POST['pageid'] and request.user.is_authenticated():
+		groupList=[]	
+		try:
+			securityCheckObjs=SecurityCheck.objects.filter(pageid=request.POST['pageid'])
+			for s in securityCheckObjs:
+				userlis=[]
+				userlis.append(s.owner+"(owner/leader)")				
+				try:				
+						        					
+					userlist=s.sharedWith.all()                          #get all the users for a particular group
+					for u in userlist:							
+						userlis.append(u.username)
+			
+					if s.textobj.filename=="_"+request.POST['filename']:	#the current user's group comes first
+						groupList.insert(0,userlis)
+			
+					else:
+						groupList.append(userlis)	
+		
+				except:
+					groupList.append(userlis)
+		
+		except SecurityCheck.DoesNotExist:
+			groupList=["No Groups are formed for editing this page "]
+
+		return HttpResponse(json.dumps(groupList),content_type="application/json")
+	else:
+		raise Http404()
+
+	
+	
+#def removeUser(request):
+	
+
+#KEY ASSUMPTION: each user can have only one draft for a page.
+
+def entryExists(textObjName):
+	name="_"+textObjName
+	try:
+		textObj=TextObj.objects.get(filename=name)
+		return True
+	except TextObj.DoesNotExist:
+		return False	
+			
+def isOwner(request,textObjName):
+	name="_"+textObjName
+	try:
+		securityCheckObj=SecurityCheck.objects.get(owner=request.user.username,textobj__filename=name)		
+		return True
+	except SecurityCheck.DoesNotExist:
+		return False
+
+def isSharedWith(request,textObjName):
+	name="_"+textObjName
+	try:
+		securityCheckObj=SecurityCheck.objects.get(sharedWith__username=request.user.username,textobj__filename=name)
+		return True
+	except SecurityCheck.DoesNotExist:
+		return False
+
+def getTextObjName(request): #assume 
+	pageid=request.POST['pageid']
+	owner=request.POST['owner']
+	try:
+		securityCheckObj=SecurityCheck.objects.get(owner=owner,pageid=pageid,sharedWith__username=request.user.username)
+		return securityCheckObj.textobj.filename[1:]
+	except SecurityCheck.DoesNotExist:
+		raise Http404()	
+		
+def get_or_insertTextObjName(request):
+	
+	def randomStringX(length):
+	    s = ''
+	    letters = "0123456789abcdefghijklmnopqrstuvwxyz"
+	    while len(s) < length:
+		s += letters[random.randint(0, len(letters)-1)]
+	    return s
+
+	def randomNameX():
+	    name = randomString(10)
+	    while TextObj.objects.filter(filename="_"+name).count() > 0:
+		name = randomString(10)
+	    return name
+	
+	pageid = request.POST['pageid']
+
+	try:
+		securityCheckObj=SecurityCheck.objects.get(owner=request.user.username,pageid=pageid)
+		return securityCheckObj.textobj.filename[1:]
+	except SecurityCheck.DoesNotExist:
+		name="_"+randomNameX()
+		o = TextObj(filename=name)
+		o.save()
+		#textb,mobwrite
+		try:
+			gbObj = Gbobject.objects.get(node_ptr_id=pageid)  #over-ride initial data with data from GBobjects
+			o.text = gbObj.content_org
+			o.save()
+			securityCheckObj=SecurityCheck(pageid=pageid,owner=request.user.username,textobj=o)
+			securityCheckObj.save()
+			return name[1:]
+		except Gbobject.DoesNotExist:	
+			return "" 
+	except:
+		return ""
+
+def editButtonFx(request):
+	if request.method=='POST' and 'pageid' in request.POST and request.POST['pageid'] and request.user.is_authenticated():
+		return HttpResponse(get_or_insertTextObjName(request))
+	else :
+		raise Http404()
+
+def inviteAcceptFx(request):
+	if request.method=='POST' and 'pageid' in request.POST and request.POST['pageid'] and 'owner' in request.POST and request.POST['owner'] and request.user.is_authenticated():
+		return HttpResponse(getTextObjName(request))
+	else:
+                raise Http404()

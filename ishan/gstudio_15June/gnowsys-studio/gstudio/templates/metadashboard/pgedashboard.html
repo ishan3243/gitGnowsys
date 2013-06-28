@@ -20,22 +20,42 @@
 			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/form.js"></script>
 			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/iframe.js"></script>
 			<script>
+			var suggests;
 			mobwrite.syncGateway = '/textb/mobwrite/';
 	       	        mobwrite.syncUsername = "{{request.user.username}}";	
                         $(document).ready(function(){
-			 $(".request").click(function(){
+		
+		          $("#dynamic").autocomplete({source:suggests});
+
+			  $("#hiddenButton").click(function(){
+				window.setInterval(function() {
+   			 // this will be invoked after every 5s 
+   			        $.post('/textb/getCurrentUsers/',{filename:$('.orgitdownEditor').attr('id')},function(data,status){
+			
+				//alert(data[0]);
+				$('#listOfUsers > li').remove();
+				  for(user in data)
+ 				  $('#listOfUsers').append('<li>'+data[user]+'</li>');
+				});
+				}, 5000);						
+				});
+
+			   $(".request").click(function(){
                             var str=this.id;
 			    pageid=str.substring(0,str.indexOf('+'));
 			    owner=str.substring(str.indexOf('+')+1,str.length);
-				$.post("/textb/securityCheck/",{pageid:pageid,owner:owner},
+			    $(".editpagecontent").trigger("click");
+				$.post("/textb/invitationAccept/",{pageid:pageid,owner:owner},
 				function(data,status){
-					if(data==="") alert("You are no longer allowed to view this page");					
+					if(status=='error') alert("no longer allowed to view page");					
 					else 
                                         { 
-                                            $(".editpagecontent").trigger("click");		//trigger the edit button
+                                            //$(".editpagecontent").trigger("click");		//trigger the edit button
                                             mobwrite.unshare($(".orgitdownEditor").attr("id")); //unshare the current textbox
-                                            $(".orgitdownEditor").attr("id",data);   //change the id
+                                            $(".orgitdownEditor").attr("id",data);   		//change the id
                                             mobwrite.share(data);	      		//share the textbox
+					  //  alert(data);
+					    $("#hiddenButton").trigger('click');
                                         }
 					}	
 				);
@@ -44,21 +64,22 @@
 
 
 			   $(".sendRequest").click(function(){
-				alert("in sendRequest!");
+				//alert("in sendRequest!");
 				$(".editpagecontent").trigger("click");				
 				var str=this.id;
-			        var pageid=str.substring(0,str.indexOf('+'));
-			        var owner=str.substring(str.indexOf('+')+1,str.length);
 				var user=$("#dynamic").attr('value');		     
-				$.post("/textb/addRequest/",{username:user,owner:owner,pageid:pageid},function(data,status){
+				$.post("/textb/addRequest/",{sentTo:user,textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
 					alert(status+":"+data);});			
 				});
 
 
-			   var suggests;
-                           $.post("/textb/getUserList/",{},function(data,status){suggests=data});
-			   $("#dynamic").autocomplete({source:suggests});			
-			});
+			   //var suggests;
+			   /*$("#hiddenButton2").click(function{
+				alert('getting userlist');
+                           	$.post("/textb/getUserList/",function(data,status){suggests=data;});
+			   	$("#dynamic").autocomplete({source:suggests});			
+				});	*/		
+		});
     
 		
 			</script>
@@ -269,6 +290,7 @@ $(".savesubsec1").hide();
        </form>
 
 	<div id="randomid" name="+{{page_ob.id}}+{{user.username}}"/>
+	
 	<!--<div id="textb">
 	<button id="edittextb">Edit with textb</button> 
         <br>
@@ -277,18 +299,44 @@ $(".savesubsec1").hide();
 	<button hidden id="publishtextb">Publish</button>
 	<br>
 </div>-->
-           <h2>send a request to a user</h2>
-		<input type="text" id="dynamic" name="Enter UserName" value="">
+          <div id="invite" hidden> 
+		<h2>send a request to a user</h2>
+		<input type="text" id="dynamic" name="Enter UserName" value=""></input>
 		<button class="sendRequest" id="{{page_ob.id}}+{{user.username}}">Send Request</button>
-    	  
-	   <h2>List of collaboration requests</h2>
-           <ul>
-           {% for elem in requestOwners %}
-               <li> <p class="request" id="{{page_ob.id}}+{{elem}}"> the user:{{elem}} wants to collaborate on this page</p> </li>
-           {% endfor %}
-           </ul>
-
-        {% endif %}
+	  </div>
+	   
+	   <div id="collaborations">    	  
+	   	<h2>List of collaboration requests</h2>
+           	<ul>
+           		{% for elem in requestOwners %}
+           		    <li> <p class="request" id="{{page_ob.id}}+{{elem}}"> the user:{{elem}} wants to collaborate on this page</p> </li>
+           		{% endfor %}
+           	</ul>
+	   	</div>
+	   
+           <div id="invitedUsers">
+	   	<h2> List of users you have invited for this page</h2>	
+		<ul>		
+			{% for elem in sentTo %}
+			<li><p>{{elem}}</p></li>		
+			{% endfor %}		  	
+		</ul>	
+	   </div>
+	
+	   <h2 id="currentUsers">List of users currently editing this file</h2>
+	   <ul id="listOfUsers">
+	   </ul>
+           <button id="hiddenButton" style='visibility:hidden'> </button>
+	   <button id="hiddenButton2" style='visibility:hidden'> </button>
+		
+	   <div id="groups" style="display:none;"> 
+           	<h2> All the groups editing this page </h2>
+		<ol id="currentGroups">
+		
+		</ol>
+	   </div>
+       
+	 {% endif %}
 	<div id="coll">
 	  
 	    {% for each in test %}
