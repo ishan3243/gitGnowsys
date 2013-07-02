@@ -25,7 +25,7 @@
 	       	        mobwrite.syncUsername = "{{request.user.username}}";	
                         $(document).ready(function(){
 		
-		          $("#dynamic").autocomplete({source:suggests});
+		          //$("#dynamic").autocomplete({source:suggests});
 
 			  $("#hiddenButton").click(function(){
 				window.setInterval(function() {
@@ -78,7 +78,18 @@
 				alert('getting userlist');
                            	$.post("/textb/getUserList/",function(data,status){suggests=data;});
 			   	$("#dynamic").autocomplete({source:suggests});			
-				});	*/		
+				});	*/	
+			   $("#dy").click(function(){
+				     var items = [];  
+ 				$.getJSON('/textb/getUserList/',{},function(result){
+			  		$.each(result, function(key,value) {
+			    		items.push(value);
+			  		});
+					$( "#dynamic" ).autocomplete({
+					source: items
+			       		 });
+				});
+			    });	
 		});
     
 		
@@ -301,7 +312,7 @@ $(".savesubsec1").hide();
 </div>-->
           <div id="invite" hidden> 
 		<h2>send a request to a user</h2>
-		<input type="text" id="dynamic" name="Enter UserName" value=""></input>
+		<input type="text" id="dynamic" name="Enter UserName" value=""></input> <input hidden type='button' id='dy' value='dy'></input>
 		<button class="sendRequest" id="{{page_ob.id}}+{{user.username}}">Send Request</button>
 	  </div>
 	   

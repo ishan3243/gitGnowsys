@@ -92,7 +92,7 @@ def pagedashboard(request,pageid):
    if iscoll:
       collection=True
    
-   #userlist=[]
+   userlis=[]
    pageRequests=[]
    if (request.user.is_authenticated()):
      
@@ -111,7 +111,7 @@ def pagedashboard(request,pageid):
          print "finallyhi"
       
       #display all invitees
-      userlis=[]		
+      #userlis=[]		
       try:		
          securityCheckObj=SecurityCheck.objects.get(owner=request.user.username,pageid=pageid)
 	 userlist=securityCheckObj.sharedWith.all()  #returns a list of User objects.

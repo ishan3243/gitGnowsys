@@ -180,7 +180,7 @@ function moveDown() {
        var pageid=(location.href.split("/"))[6];
        $(".editpagecontent").one("click",function(){
 	tObjName = '';
-	  
+	
 	   //alert('helooooo');
 	  //  $("#requestHeading").show();
 	    //$("#dynamic").show();
@@ -288,12 +288,8 @@ function moveDown() {
 
 	  
           $("#hiddenButton").trigger('click');   
-	$("#invite").show();   
-	 
-	// var suggests;
-	  // alert('getting userlist');
-           $.post("/textb/getUserList/",{},function(data,status){suggests=data;});
-           //$("#dynamic").autocomplete({source:suggests}); 
+	$("#invite").show();
+	$("#dy").trigger('click');
 
 });
 	
@@ -341,26 +337,37 @@ function moveDown() {
 
    	
        $(".savepagecontent").one("click",function(){
+	 var isOwner;
+	 $.post('/textb/checkOwner2/',{textObjName:$(".orgitdownEditor").attr("id")},function(data){isOwner=data;
+
+		if(isOwner==1)	
+		{	
+	  		 mobwrite.unshare($(".orgitdownEditor").attr("id"));    //textb
 	   
-	mobwrite.unshare($(".orgitdownEditor").attr("id"));    //textb
-	   
-	$.post('/textb/deleteLink/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
-		if(data==='DS') alert("Your work has been published");
-		else alert('Error: '+status);	}
-	);
-	   
-	   var org_data = $(".orgitdownEditor").val();   //textb
-	   var elmts = document.getElementsByClassName("reptext");
-	   var encode_data = encodeURIComponent(org_data);
-	   var decode_data = decodeURIComponent(encode_data.replace(/\+/g, " "));
-	   for (var i = 0; i < elmts.length; i++){
-	       elmts[i].setAttribute("value",decode_data);}
-           $(".pagedit").trigger('click');
-	   $(".savepagecontent").hide();
-	   $(".orgitdownContainer").hide();
+		
+			$.post('/textb/deleteLink/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
+			if(data==='DS') 
+			{		
+				alert("Your work has been published");
+				var org_data = $(".orgitdownEditor").val();   //textb
+			  	 var elmts = document.getElementsByClassName("reptext");
+			  	 var encode_data = encodeURIComponent(org_data);
+			  	 var decode_data = decodeURIComponent(encode_data.replace(/\+/g, " "));
+			  	 for (var i = 0; i < elmts.length; i++){
+			  	 elmts[i].setAttribute("value",decode_data);}
+		          	 $(".pagedit").trigger('click');
+			  	 $(".savepagecontent").hide();
+			  	 $(".orgitdownContainer").hide();		
+			}		
+			else alert('Error: '+status);	
+		  
+		});
+		}   
 	
-      	   
-       });
+		else alert("You don't have enough privelages to save this file ");
+
+});   
+	});
 
 
       $("#editnodecontent").one("click",function(){

@@ -16,9 +16,19 @@ from mobwrite.models import *
 from django.contrib.auth.models import User
 import json
 import mobwrite.views
+#from goto import goto,label
+
+
+def checkOwnership2(request):
+	if 'textObjName' in request.POST and request.POST['textObjName']:
+		try:			
+			securityCheckObj=SecurityCheck.objects.get(textobj__filename="_"+request.POST['textObjName'], owner=request.user.username)
+			return HttpResponse(1)
+		except:
+			return HttpResponse(0)
 
 def checkOwnership(request):
-	if request.POST['user'] and request.POST['owner']:
+	if request.method=='POST' and request.POST['user'] and request.POST['owner']:
 		return request.POST['user'] == request.POST['owner']
 
 def deleteFx(request):
@@ -68,15 +78,13 @@ def addRequestFx(request):
 		raise Http404()
 
 def getUserListFx(request):
-	if request.method=='POST':
-		
-		userlist=[]
-		for each in User.objects.all():
-			userlist.append(each.username.__str__()+"  <"+each.email.__str__()+">")
-        	userListJson = json.dumps(userlist)
-    		return HttpResponse(userListJson)
-	else:
-		raise Http404()
+	
+	userlist=[]
+	for each in User.objects.all():
+		userlist.append(each.username.__str__()+"  <"+each.email.__str__()+">")
+        userListJson = json.dumps(userlist)
+    	return HttpResponse(userListJson)
+	
   
 
 def mobwriteText(request):
@@ -214,12 +222,13 @@ def get_or_insertTextObjName(request):
 	try:
 		securityCheckObj=SecurityCheck.objects.get(owner=request.user.username,pageid=pageid)
 		return securityCheckObj.textobj.filename[1:]
-	except SecurityCheck.DoesNotExist:
+	except SecurityCheck.DoesNotExist:	
 		name="_"+randomNameX()
-		o = TextObj(filename=name)
-		o.save()
+		
 		#textb,mobwrite
 		try:
+			o = TextObj(filename=name)
+			o.save()   #possible Integrity Error			
 			gbObj = Gbobject.objects.get(node_ptr_id=pageid)  #over-ride initial data with data from GBobjects
 			o.text = gbObj.content_org
 			o.save()
@@ -228,6 +237,7 @@ def get_or_insertTextObjName(request):
 			return name[1:]
 		except Gbobject.DoesNotExist:	
 			return "" 
+	
 	except:
 		return ""
 

@@ -1,54 +1,36 @@
-body {
-  background-color: #ccc;
-  font-family: sans-serif;
-  font-size: 9pt;
-  margin: 0;
-  padding: 0;
-}
-h1, h2, h3 {
-  font-weight: normal;
-  padding: 0;
-  margin: 4px;
-}
-h1 {
-    font-size: 15pt;
-}
-textarea {
-  background-color: #f0f0f0;
-  font-family:monospace;
-  border: 0;
-  font-size: 9pt;
-  padding: 0px;
-  outline: none;
-  resize: none;
-  -moz-resize: none;
-}
-#canvas {
-  padding: 4px;
-}
-#title {
-    margin-left: 4px;
-    margin-top: 4px;
-}
-#menu {
-    position: fixed;
-    top: 4px;
-    right: 4px;
-    text-align: right;
-}
-a {
-    color: #000;
-}
 
-#content {
-  border: 0;
-  padding: 0px;
-  position: absolute;
-  top: 60px;
-  left: 8px;
-}
 
-iframe {
-    border: 0
-    
-}
+
+/*  Reset Styles (reset.css of Blueprint www.blueprintcss.org)
+------------------------------------------------------------------------------------------------------ */
+
+@import url('reset.css');
+
+
+
+/*  Grappelli Styles:
+    The core settings of Grappelli are defined here.
+    Do not change them (better use your own skins/css in the next section).
+------------------------------------------------------------------------------------------------------ */
+
+@import url('typography.css');
+@import url('structures.css');
+@import url('components.css');
+@import url('tools.css');
+@import url('forms.css');
+@import url('buttons.css');
+@import url('tables.css');
+@import url('admin-tools.css');
+
+
+
+/*  Grappelli Skins & Custom Styles:
+    Use the delivered Grappelli skins or import your own skins/css here
+------------------------------------------------------------------------------------------------------ */
+
+/*  Grappelli Basic Skin: The Plain Version */
+/*@import url('grappelli-skin-basic.css');*/
+
+/*  Grappelli Default Skin: Adds Border-Radius & Background-Gradients to the Grappelli Basic Skin */
+@import url('grappelli-skin-default.css');
+

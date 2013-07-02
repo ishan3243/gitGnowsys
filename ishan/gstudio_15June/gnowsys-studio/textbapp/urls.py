@@ -25,4 +25,5 @@ urlpatterns = patterns(
     (r'^getUserList/$','textbapp.views.getUserListFx'),
     (r'getCurrentUsers/$','textbapp.views.getCurrentUsersFx'),
     (r'^getAllGroups/$','textbapp.views.getAllGroupsFx'),
+    (r'^checkOwner2/$','textbapp.views.checkOwnership2'),
 )
