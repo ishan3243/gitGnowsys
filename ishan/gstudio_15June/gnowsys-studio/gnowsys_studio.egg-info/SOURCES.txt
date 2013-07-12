@@ -500,6 +500,7 @@ gstudio/templates/metadashboard/logindashboard.html
 gstudio/templates/metadashboard/newcollection.html
 gstudio/templates/metadashboard/newdownload.html
 gstudio/templates/metadashboard/pgedashboard.html
+gstudio/templates/metadashboard/textbpgedashboard.html
 gstudio/templates/metadashboard/userdashboard.html
 gstudio/templates/metadashboard/wikidashboard.html
 gstudio/templates/metadashboard/wikifilter.html

@@ -1,0 +1,234 @@
+<style>
+.newDiv{
+background: #dee4fa;
+border: 2px solid transparent;
+border-radius: 15px;
+box-shadow: 0px 0px 20px #000000;
+width:450px;
+}
+
+.newDiv > ul{ font-size:13px ;}
+.newDiv > ol{ font-size:13px ;}
+</style>
+
+<script>
+<!-- Mobwrite js -->
+	                <!--<script src="http://code.jquery.com/jquery-1.9.1.js"></script>-->
+                        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+			<script type="text/javascript" src="/static/js/jquery.js"></script> -->
+			<!--
+			<script src="/static/js/mobwrite/compressed_form.js"></script>
+			-->
+			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/diff_match_patch.js"></script>
+			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/core.js"></script>
+			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/form.js"></script>
+			<script type="text/javascript" src="{{STATIC_URL}}gstudio/js/mobwrite/iframe.js"></script>
+			<script>
+			var suggests;
+			mobwrite.syncGateway = '/textb/mobwrite/';
+	       	        mobwrite.syncUsername = "{{request.user.username}}";	
+                        $(document).ready(function(){
+			  
+			  // discard an invitation
+		          $("#discard").click(function(){
+				  mobwrite.unshare($(".orgitdownEditor").attr("id"));    //textb
+		
+				  $.post('/textb/deleteLink/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
+				    if(status=='success')
+					{if(data==='DS') 
+					 {		
+					   alert("Discarded");		location.reload();
+					 }		
+					 else { alert("You don't have enough privelages");	
+					 	mobwrite.share($(".orgitdownEditor").attr("id"));
+					      }
+					 }
+				    else alert(status);
+				   });
+		          });
+
+			  // fetches online users editing thiss draft
+			  $("#hiddenButton").click(function(){
+				window.setInterval(function() {
+   			 // this will be invoked after every 5s 
+   			        $.post('/textb/getCurrentUsers/',{filename:$('.orgitdownEditor').attr('id')},function(data,status){
+			
+				//alert(data[0]);
+				$('#listOfUsers > li').remove();
+				  for(user in data)
+ 				  $('#listOfUsers').append('<li>'+data[user]+'</li>');
+				});
+				}, 5000);						
+				});
+				
+			  	
+
+			   // sends invitation request to another user
+			   $(".sendRequest").click(function(){
+				//alert("in sendRequest!");
+				$(".editpagecontent").trigger("click");				
+				var str=this.id;
+				var user=$("#dynamic").attr('value');		     
+				$.post("/textb/addRequest/",{sentTo:user,textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
+					alert(status+":"+data);});			
+				});
+
+
+			   // autocomplete functionality : fetches list of all users	
+			   $("#dy").click(function(){
+				     var items = [];  
+ 				$.getJSON('/textb/getUserList/',{},function(result){
+			  		$.each(result, function(key,value) {
+			    		items.push(value);
+			  		});
+					$( "#dynamic" ).autocomplete({
+					source: items
+			       		 });
+				});
+			    });	
+			    
+			    
+		{% if request.user.is_authenticated %}
+			window.setInterval(function() {
+			
+			//get all invitations/requests a user received from and sent to other users for a this page
+   			 $.get('/textb/getCollabRequestsandSentTo/{{page_ob.id}}/',function(data,status){
+			
+				//alert(data[0]);
+				$('#collabRequests > li').remove();
+				  for(user in data[0])
+				  {
+				  	if(data[0][user]=="No collaboration requests.")
+ 				  	$('#collabRequests').append('<li>'+data[0][user]+'</li>');
+ 				  	else
+ 				  	$('#collabRequests').append('<li class=\"request\" id=\"'+data[0][user]+'\"><a>'+'user-'+data[0][user]+' wants to collaborate!'+'</a></li>');
+ 				  }
+				
+				$('#sentTo > li').remove();
+				  for(user in data[1])
+				  {
+				  if(data[3]==0||data[3]==1)
+				  $('#sentTo').append('<li>'+data[1][user]+'</li>');
+				  else
+ 				  $('#sentTo').append('<li>'+data[1][user]+'<button class=\"unshare\" id=\"'+data[1][user]+'\">unshare</button></li>');
+ 				  }
+				
+				 currVersion=data[2];	
+                                 document.getElementById('currentVersion').innerHTML=currVersion;
+                                 document.getElementById('currentVersion').focus()
+
+		
+				});
+			},1000);
+		{% endif %}
+		
+		// indicator if collaboration working successfully : goes yellow 
+		// if there is network error or if the draft no longer exists
+			var bulb=0;	 
+		setInterval(function(){var c=document.getElementById("myCanvas");	
+			//alert(lightBulb);
+			
+			var ctx=c.getContext("2d");
+			ctx.clearRect(0,0,c.width,c.height);
+			ctx.beginPath();
+			ctx.arc(20,20,10,0,2*Math.PI);
+			if(lightBulb==false)
+			{
+			bulb++;
+			if(bulb>5)
+			ctx.fillStyle="#FFF333";}
+			else
+			{//alert("hi");
+			bulb=0;
+			ctx.fillStyle='#00FF00';}
+			ctx.fill();
+			},2000);
+		
+		});
+		
+		// when a invitation request is clicked/accepted
+                $(document).on("click", ".request", function(){      //for dynamically changing elements, click fx is done like this.
+			    //alert("hello");
+                            var owner=this.id;
+			    pageid={{page_ob.id}};
+			    
+			    $(".editpagecontent").trigger("click");
+				$.post("/textb/invitationAccept/",{pageid:pageid,owner:owner},
+				function(data,status){
+					if(status=='error') alert("no longer allowed to view page");					
+					else 
+                                        { 
+                                            //$(".editpagecontent").trigger("click");		//trigger the edit button
+                                            mobwrite.unshare($(".orgitdownEditor").attr("id")); //unshare the current textbox
+                                            $(".orgitdownEditor").attr("id",data);   		//change the id
+                                            mobwrite.share(data);	      		//share the textbox
+					  //  alert(data);
+					    $("#hiddenButton").trigger('click');
+					    $("#invite").hide();
+					    $("#invitedUsers").hide();
+                                        }
+					}	
+				);
+
+		
+				
+				});
+		
+		 // unsharing a draft from another user		
+		 $(document).on("click", ".unshare", function(){
+		        $.post('/textb/unshare/',{user:this.id,pageid:{{page_ob.id}} });
+		 
+		 });     
+</script>
+
+<input hidden type='button' id='discard' value='Discard'></input>
+
+<canvas id="myCanvas" id="myCanvas" width="40" height="40" style="border:1px solid #d3d3d3;display:none;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+<div id="invite" hidden> 
+		<h2>send a request to a user</h2>
+		<input type="text" id="dynamic" name="Enter UserName" value=""></input> <input hidden type='button' id='dy' value='dy'></input>
+		<button class="sendRequest" id="{{page_ob.id}}+{{user.username}}">Send Request</button>
+	  </div>
+	   <br> <br>
+	   
+	   <div id="collaborations" class="newDiv">    	  
+	   	<h2>List of collaboration requests</h2>
+           	<ul id="collabRequests">
+           		
+           	</ul>
+	   </div>
+	    <br> <br>
+           <div id="invitedUsers"  class="newDiv">
+	   	<h2> List of users you have invited for this page</h2>	
+		<ul id="sentTo">		
+					  	
+		</ul>	
+	   </div>
+	    <br> <br>
+            
+           <div  id="currUserDiv" style="display:none;" class="newDiv"> 	
+	  	 <h2 id="currentUsers"">List of users currently editing this file</h2>
+	  	 <ul id="listOfUsers">
+	   	 </ul>
+	   </div>
+	   <br> <br>
+	   
+           <button id="hiddenButton" style='display:none;'> </button>
+	   <button id="hiddenButton2" style='display:none;'> </button>
+		
+	   <div id="groups" style="display:none;"  class="newDiv"> 
+           	<h2> All the groups editing this page </h2>
+		<ol id="currentGroups">
+		
+		</ol>
+	   </div>
+	    <br> <br>
+
+	  <div id='version' style="display:none;"  class="newDiv">
+	  	<h3>Base Version</h3>
+		<p id='baseVersion'></p>
+		<h3>Current Version</h3>
+	  	<p id='currentVersion'></p>
+	  </div>	
+	   <br> <br>

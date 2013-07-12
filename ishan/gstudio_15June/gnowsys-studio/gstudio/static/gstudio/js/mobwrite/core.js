@@ -22,6 +22,13 @@
  * @author fraser@google.com (Neil Fraser)
  */
 
+/**
+ *textb indicator : true if working fine false otherwise 
+  Boolean: whether connection was established last time
+   used to set light as indicator
+ */
+var lightBulb = false;
+
 
 /**
  * Singleton class containing all MobWrite code.
@@ -199,7 +206,6 @@ mobwrite.uniqueId = function() {
  * @type {string}
  */
 mobwrite.syncUsername = mobwrite.uniqueId();
-//mobwrite.syncUsername = {{username}};       can't use django template tags in an external javascript file.
 
 /**
  * Hash of all shared objects.
@@ -841,10 +847,14 @@ mobwrite.syncLoadAjax_ = function(url, post, callback) {
     }
   }
   if (req) {
-    req.onreadystatechange = callback;
+  //textb indicator : true if working fine false otherwise
+    try
+    {req.onreadystatechange = callback;
     req.open('POST', url, true);
     req.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
     req.send(post);
+    lightBulb = ( req.status >= 200 && req.status < 300 || req.status === 304 )
+    } catch (error) {lightBulb = false;}
   }
   return req;
 };
@@ -865,11 +875,13 @@ mobwrite.syncCheckAjax_ = function() {
   if (mobwrite.syncAjaxObj_.readyState == 4) {
     // Only if "OK"
     if (mobwrite.syncAjaxObj_.status == 200) {
+      lightBulb = true;
       var text = mobwrite.syncAjaxObj_.responseText;
       mobwrite.syncAjaxObj_ = null;
       mobwrite.syncRun2_(text);
     } else {
       if (mobwrite.debug) {
+        lightBulb = false;
         window.console.warn('Connection error code: ' + mobwrite.syncAjaxObj_.status);
       }
       mobwrite.syncAjaxObj_ = null;

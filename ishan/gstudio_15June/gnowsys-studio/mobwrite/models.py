@@ -16,7 +16,6 @@ from reversion import revision
 from reversion.models import Version
 
 import mobwrite_core
-from objectapp.models import Gbobject
 
     
 def randomString(length):
@@ -60,8 +59,6 @@ class TextObj(mobwrite_core.TextObj, models.Model):
     # Setup this object
     mobwrite_core.TextObj.__init__(self, *args, **kwargs)
     models.Model.__init__(self, *args, **kwargs)
-    #oooo = Gbobject.objects.get(node_ptr_id=int(self.filename[-3:]))
-    #self.text=oooo.content_org
 
   def setText(self, newtext):
     if datetime.datetime.now()-self.updated > datetime.timedelta(seconds=10) and self.text != newtext:
@@ -97,13 +94,6 @@ class TextObj(mobwrite_core.TextObj, models.Model):
     except model.DoesNotExist:
         o = model(filename=filename)
         o.save()
-        #textb,mobwrite
-        nodePTR=o.filename[12:len(o.filename)]
-        nodePTR=nodePTR[0:nodePTR.find("+")]
-        t_text = Gbobject.objects.get(node_ptr_id=int(nodePTR)).content_org   #over-ride initial data with data from GBobjects
-        if(t_text is not None and t_text !=""):
-            o.text= t_text
-            o.save()
     return o
   get_or_insert = classmethod(get_or_insert)
     

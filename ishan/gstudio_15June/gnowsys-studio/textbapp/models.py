@@ -1,25 +1,29 @@
 from django.db import models
 import mobwrite.models
 from django.contrib.auth.models import User
+import objectapp.models
 # Create your models here.
 
 class SecurityCheck(models.Model):
-	textobj=models.ForeignKey(mobwrite.models.TextObj)
-	pageid=models.IntegerField()
-	owner=models.CharField(max_length=255)
-	sharedWith=models.ManyToManyField(User)
+	#an object which contains the details of drafts(mobwrite textobjs) and collaborating groups
 	
-	#def __init__(self,owner,filename,requestingUser):   
-	#	models.Model.__init__(self)
-	#	print 'hi1\n'		
-	#	self.owner=owner
-	#	print 'hi2\n'	
-	#	self.textobj=mobwrite.models.TextObj.objects.get(filename=filename)
-	#	print 'hi3\n'	
-	#	self.sharedWith.add(User.objects.get(username=requestingUser))
-	#	print 'hi4\n'	
- 
-
-
-
-
+	# Object properties:
+  	# .baseVersion - the version of wikipage whose contents are being edited
+  	# .pageid - reference to the wikipage
+  	# .textobj - The shared text object being worked on.
+  	# .owner - user who created a draft for a wikipage
+  	# .sharedWith - other users with which this draft is shared (to be edited only)
+	
+        baseVersion=models.IntegerField()
+	textobj=models.ForeignKey(mobwrite.models.TextObj)
+	pageid=models.ForeignKey(objectapp.models.Gbobject)
+	owner=models.ForeignKey(User, related_name="%(app_label)s_%(class)s_owner")
+	sharedWith=models.ManyToManyField(User, through='CreatedOn')
+	
+	
+class CreatedOn(models.Model):  #the intermediate table for the many to many field sharedWith    
+	securityCheckObj=models.ForeignKey(SecurityCheck)
+	invitedUser=models.ForeignKey(User)
+	date_created=models.DateTimeField(auto_now_add=True)
+	isRead=models.BooleanField(default=False)
+	

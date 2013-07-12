@@ -48,18 +48,6 @@ urlpatterns = patterns(
     url(r'^gstudio/', include('gstudio.urls')),
     url(r'^objects/', include('objectapp.urls')),
     url(r'^textb/', include('textbapp.urls')),
-    #(r'^raw/(?P<name>.+)/', 'mobwrite.views.raw'),
-    #(r'^r/(?P<name>.+)/', 'mobwrite.views.raw'),
-    #(r'^m/(?P<name>.+)/', 'mobwrite.views.html'),
-    #(r'^t/(?P<name>.+)/', 'mobwrite.views.text'),
-    #(r'^$', 'app.views.index'),
-    #(r'^new/$', 'mobwrite.views.new'),
-    #(r'^mobwrite/', 'mobwrite.views.mobwrite'), 
-    #(r'^test/', test_view), 
-    #(r'^synclink/$','mobwrite.views.syncfx'),
-    #(r'^deleteLink/$','mobwrite.views.deleteFx'),
-
-
     url(r'^comments/', include('django.contrib.comments.urls')),
     #URL for XMLRPC
     url(r'^xmlrpc/$','django_xmlrpc.views.handle_xmlrpc'),

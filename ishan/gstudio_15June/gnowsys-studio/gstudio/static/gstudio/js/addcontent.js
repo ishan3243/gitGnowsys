@@ -177,15 +177,10 @@ function moveDown() {
 	   $(".deletesec").hide();
        });
 
+// textb
        var pageid=(location.href.split("/"))[6];
        $(".editpagecontent").one("click",function(){
-	tObjName = '';
-	
-	   //alert('helooooo');
-	  //  $("#requestHeading").show();
-	    //$("#dynamic").show();
-	    //$(".sendRequest").show();
-	   // $("#hiddenButton2").trigger("click");
+            
 	    $(this).replaceWith('<textarea id="gnoweditor" style="visibility:hidden;width:450px"></textarea>');
 	    
 	    editWikipage=true;
@@ -196,9 +191,17 @@ function moveDown() {
 	  
 	    $("#content").css({"width":"600px",});
 	    $("#gnoweditor").orgitdown(mySettings);
+	    
+	    //textb : retrieves the name of textobj/draft and changes the id of textarea accordingly
 	    $.post('/textb/editButton/',{pageid:pageid},function(data,status){		
 		if(status=="error")	alert("no!!!!!!");
-		else {$(".orgitdownEditor").attr("id",data);   tObjName= tObjName+data;   }
+		else {$(".orgitdownEditor").attr("id",data); 
+		
+		       $.post('/textb/getBaseVersion/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
+		       document.getElementById('baseVersion').innerHTML=data;
+			});
+       	   	       $('#version').show();
+		     }
 		});
 	       //textb	    
 		
@@ -222,12 +225,6 @@ function moveDown() {
 	   $(".editsubsec").hide();
 	mobwrite.syncGateway = '/textb/mobwrite/';
 
-
-
-   	/*$("#gnoweditor").load(function() {
-        	mobwrite.share('gnoweditor');
-    	});*/
-
     	var iframe = document.getElementById($(".orgitdownEditor").attr("id"));
    	 iframe.onkeypress = function () {	
 	
@@ -239,15 +236,16 @@ function moveDown() {
         mobwrite.syncRunPid_ = window.setTimeout(mobwrite.syncRun1_,mobwrite.syncInterval);
          }
        };
-    //alert($(".orgitdownEditor").attr("id"));	
-    //alert($(".orgitdownEditor").attr("id"));	
-     setTimeout(function(){
+       
+     //  retrieve all groups created for a specific wikipage periodically
+     setInterval(function(){
      $("#groups").show();
      $.post('/textb/getAllGroups/',{pageid:pageid ,filename:$(".orgitdownEditor").attr("id") },function(data,status){
 		if(status=="error") alert("Status: "+status);
 		else
 		{	
-			var len1=data.length;			
+			var len1=data.length;	
+			$('#currentGroups > ul').remove();		
 			for(i=0;i<len1;i++)
 			{	
 				if(i==0)  var str="<ul>Your Group</ul>";
@@ -289,7 +287,10 @@ function moveDown() {
 	  
           $("#hiddenButton").trigger('click');   
 	$("#invite").show();
+	$("#discard").show()
 	$("#dy").trigger('click');
+	$("#currUserDiv").show();
+	$("#myCanvas").show();
 
 });
 	
@@ -336,38 +337,32 @@ function moveDown() {
     });
 
    	
-       $(".savepagecontent").one("click",function(){
-	 var isOwner;
-	 $.post('/textb/checkOwner2/',{textObjName:$(".orgitdownEditor").attr("id")},function(data){isOwner=data;
-
-		if(isOwner==1)	
-		{	
-	  		 mobwrite.unshare($(".orgitdownEditor").attr("id"));    //textb
-	   
-		
-			$.post('/textb/deleteLink/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
-			if(data==='DS') 
-			{		
-				alert("Your work has been published");
-				var org_data = $(".orgitdownEditor").val();   //textb
-			  	 var elmts = document.getElementsByClassName("reptext");
-			  	 var encode_data = encodeURIComponent(org_data);
-			  	 var decode_data = decodeURIComponent(encode_data.replace(/\+/g, " "));
-			  	 for (var i = 0; i < elmts.length; i++){
-			  	 elmts[i].setAttribute("value",decode_data);}
-		          	 $(".pagedit").trigger('click');
-			  	 $(".savepagecontent").hide();
-			  	 $(".orgitdownContainer").hide();		
+       $(".savepagecontent").one("click",function(){		
+			
+	  mobwrite.unshare($(".orgitdownEditor").attr("id"));    //textb
+	  // delete the draft and publish the content of textarea if draft is deleted	
+	  $.post('/textb/deleteLink/',{textObjName:$(".orgitdownEditor").attr("id")},function(data,status){
+	    if(status=='success')
+		{if(data==='DS') 
+		 {		
+		   alert("Your work has been published");
+		   var org_data = $(".orgitdownEditor").val();   //textb
+		   var elmts = document.getElementsByClassName("reptext");
+		   var encode_data = encodeURIComponent(org_data);
+		   var decode_data = decodeURIComponent(encode_data.replace(/\+/g, " "));
+		   for (var i = 0; i < elmts.length; i++){
+		 	 elmts[i].setAttribute("value",decode_data);}
+		  	 $(".pagedit").trigger('click');
+		  	 $(".savepagecontent").hide();
+		  	 $(".orgitdownContainer").hide();		
 			}		
-			else alert('Error: '+status);	
-		  
+			else {alert("You don't have enough privelages to save this file ");	
+		  		mobwrite.share($(".orgitdownEditor").attr("id"));}
+				}
+		else alert(status);
 		});
-		}   
-	
-		else alert("You don't have enough privelages to save this file ");
-
-});   
 	});
+	
 
 
       $("#editnodecontent").one("click",function(){

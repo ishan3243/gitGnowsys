@@ -25,5 +25,9 @@ urlpatterns = patterns(
     (r'^getUserList/$','textbapp.views.getUserListFx'),
     (r'getCurrentUsers/$','textbapp.views.getCurrentUsersFx'),
     (r'^getAllGroups/$','textbapp.views.getAllGroupsFx'),
-    (r'^checkOwner2/$','textbapp.views.checkOwnership2'),
+    (r'^fetchRequests/$','textbapp.views.fetchRequestsFx'),
+    (r'^getCollabRequestsandSentTo/(?P<pageid>\d+)/$', 'textbapp.views.getCollabRequestsandSentToFx'),
+    (r'^markRead/$','textbapp.views.markReadFx'),
+    (r'^unshare/$','textbapp.views.unshareFx'),
+    (r'^getBaseVersion/','textbapp.views.getBaseVersionFx'),
 )

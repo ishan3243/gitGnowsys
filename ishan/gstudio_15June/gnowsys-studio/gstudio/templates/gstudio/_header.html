@@ -1,5 +1,47 @@
 {% load i18n grp_tags %}
 
+<script>
+//-----TEXTB----
+// retrieve all notifications / invitations
+$(document).ready(function(){
+ {% if user.is_authenticated %}
+ setInterval(function(){
+  $.post("/textb/fetchRequests/",
+    {},
+    function(data,status){
+	var i=0;var j=0;
+      for(pageReqs in data)
+         {
+         if(data[j][3]==false)   //if unread
+         i++;	
+         
+         j++;
+	}
+          if(i>0)
+           $("#ufo2").text("Notifications("+i+")");
+	   
+	 $('#notifications > li').remove();
+	 for(i=0;i<data.length;i++)
+	        {
+	        	var str="";
+	 		if(data[i][3]==false)    //if unread
+	 		str="style=\"background:yellow\"";
+	 				
+	 		$('#notifications').append('<li id=\"'+data[i][0]+'+'+data[i][1]+'\" class=\"listNotify\"><a '+str+'>'+data[i][0]+' invites you on '+data[i][2]+'</a></li>'); 
+	 	}
+   });
+   },2000);
+{% endif %}
+});
+
+ $(document).on("click", ".listNotify", function(){
+ 	var owner=this.id.substring(0,this.id.indexOf('+'));
+ 	var pageid=this.id.substring(this.id.indexOf('+')+1);
+ 	$.post("/textb/markRead/",{owner:owner, pageid:pageid},function(data,success){window.location.assign(data);});
+ 	
+ 	});
+ 
+</script>
 
 <div id="header">
 
@@ -36,7 +78,7 @@
         <ul id="user-tools">
             <!-- Username -->
             <li class="user-options-container collapse closed">
-                <a href="javascript://" class="user-options-handler collapse-handler" title="{% firstof user.first_name user.username %}">{% firstof user.first_name user.username %}</a>
+                <a href="javascript://" class="user-options-handler collapse-handler" id ="ufo" title="{% firstof user.first_name user.username %}">{% firstof user.first_name user.username %}</a>
                 <ul class="user-options">
                     <!-- Change Password -->
                     {% url admin:password_change as password_change_url %}
@@ -55,6 +97,15 @@
 
                 </ul>
             </li>
+            
+            <!-- Notifications TEXTB    -->   
+            <li class="user-options-container collapse closed">
+            	<a href="javascript://" class="user-options-handler collapse-handler" id ="ufo2" >Notifications</a>
+            	<ul class="user-options" id="notifications">
+           
+            	</ul>
+            <li>	
+            
             <!-- Userlinks -->
             {% block userlinks %}
                 <!-- JS tests -->

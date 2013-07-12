@@ -1,0 +1,23 @@
+changes:
+	gstudio/views/page.py
+	included textbpgedashboard into pgedashboard.html        metadashboard/textbpgedashboard.html added  .. it contains all the HTML and JS for textb
+	addcontent.js   :- savepagecontent click(save button click) method modified
+			:- editpagecontent onclick(edit bitton click) method modified
+	mobwrite_core.py   -- changed viewobj TIMEOUT_VIEW  ... so that views of offline users are deleted
+	core.js  : indicator functinality added (green/yellow light)
+	gstudio/templates/gstudio/_header.html  : notification bar added
+	demo/setup.py : apps added textbapp,mobwrite and some other,
+		      : template dirs modified,
+		      : template loader csrf commented
+	demo/urls.py  : some urls added for textb
+
+
+files added:-
+	textbapp added
+	mobwrite added
+	metadashboard/textbpgedashboard.html added	included textbpgedashboard into pgedashboard.html  .. it contains all the HTML and JS for textb
+	addcontent.js   :- savepagecontent click(save button click) method modified
+	added mobwrite static files to gstudio/static/gstudio/js/mobwrite
+	
+
+most of the changes are indicated by comments like 'textb' 

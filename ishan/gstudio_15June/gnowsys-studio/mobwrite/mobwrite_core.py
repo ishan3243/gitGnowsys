@@ -36,7 +36,7 @@ DMP.Diff_Timeout = 0.1
 MAX_CHARS = 0
 
 # Delete any view which hasn't been accessed in 31 seconds.
-TIMEOUT_VIEW = datetime.timedelta(seconds=31)  
+TIMEOUT_VIEW = datetime.timedelta(seconds=31)  #this is changed from original so views of offline users are deleted
 
 # Delete any text which hasn't been accessed in a day.
 # TIMEOUT_TEXT should be longer than the length of TIMEOUT_VIEW
